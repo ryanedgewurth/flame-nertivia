@@ -1,0 +1,16 @@
+{
+  "name": "flamenertivia",
+  "version": "0.0.1",
+  "description": "Flame Bot",
+  "main": "flamebot.js",
+  "scripts": {
+    "test": "flamebot.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "keywords": [],
+  "dependencies": {
+    "file-system": "^2.2.2",
+    "nertivia.js": "^1.1.7"
+  }
+}
