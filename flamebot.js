@@ -1,16 +1,16 @@
-/* FLAME NERTIVIA BOT
+/* FLAME NERTIVIA bot
 Programmed by: Edgewurth
 Current Version: 2020-07-15 Patch 
-Current Version Number: 0.2.0 
-API: NodeJS with Nertivia.JS */
+Current Version Number: 0.2.0 */
 var vernum = "0.2.0"; // Update Every Build
 var vername = "2020-07-15 Patch"; // Update Every Build
 const NertiviaSys = require("nertivia.js");
-const bot = new NertiviaSys.Client();
+const client = new NertiviaSys.Client();
 const InfoCmds = require("./cmd/info.js");
 const FunCmds = require("./cmd/fun.js");
 const EcoCmds = require("./cmd/eco.js");
 const SettingCmds = require("./cmd/settings.js");
+const ErrorCmds = require("./cmd/errorhandle.js");
 var fs = require('file-system');
 var levels 
 var userconf
@@ -20,34 +20,22 @@ fs.readFile('./configs/levels.json', 'utf8', function(err, contents) {
 fs.readFile('./configs/userconf.json', 'utf8', function(err, contents) {
     userconf = JSON.parse(contents);
 });
-var botToken = "NjY3MTMyNTU5NDc4Mjc5NzgyNA.b7DVHqhdHHu2J_DmW__fiU8TaScX3Oci9Wp3OQ3UWvc"; // This is your bot token, use this to login
-var botPrefix = "&"; // Change this to change the prefix used.
+var clientToken = "xxx"; // This is your client token, use this to login
+var clientPrefix = "&"; // Change this to change the prefix used.
 var contents = null
-bot.on("ready", () => {
-    console.log(`Logged in as ${bot.user.tag}!`); // Indicates you were logged in.
-	console.log(`Flame Nertivia Bot By Edgewurth`);
+client.on("ready", () => {
+    console.log(`Logged in as ${client.user.tag}!`); // Indicates you were logged in.
+	console.log(`Flame Nertivia client By Edgewurth`);
 })
 var channelid = null
-bot.on("messageButtonClicked", (button, done) => {
-    if (button.id === "test") {
-        bot.channels.cache.get(channelid).send("Button '0w0' Test Successful", {
-            buttons: [{ id: 'unban', name: "undo" }]
+client.on("messageButtonClicked", (button, done) => {
+	try {
+    if (button.id === "userconfig") {
+        client.channels.cache.get(button.channelID).send("Select an Setting", {
+            buttons: [{ id: 'usermsgs', name: "Messages" },{ id: 'userother', name: "Other" }]
         })
-        done();
-	}
-	if (button.id === "userconfig") {
-        bot.channels.cache.get(channelid).send("Please Select a Setting Sub-Group", {
-            buttons: [{ id: 'userconfig_msgs', name: "Messages" },{ id: 'userconfig_privacy', name: "Privacy" },{ id: 'userconfig_etc', name: "Other" }]
-        })
-        done();
-	}
-	if (button.id === "userconfig_msgs") {
-        bot.channels.cache.get(channelid).send("Please Select a Setting to Modify", {
-            buttons: [{ id: 'userconfig_msgs_dmhelp', name: "Send Help to Inbox" }]
-        })
-        done();
-	}
-	if (button.id === "userconfig_msgs_dmhelp") {
+    }
+	if (button.id === "usermsgs") {
 		if (typeof userconf[button.clickedByID + "_dmhelp"] === "undefined") {
 		userconf[button.clickedByID + "_dmhelp"] = "true";
 		} else if (userconf[button.clickedByID + "_dmhelp"] === "true") {
@@ -55,32 +43,57 @@ bot.on("messageButtonClicked", (button, done) => {
 		} else {
 			userconf[button.clickedByID + "_dmhelp"] = "true";
 		};
-        done("Set Send Help to Inbox to `" + userconf[msg.author.id + "_dmhelp"] + "` for <@${button.clickedByID}>");
+        client.channels.cache.get(button.channelID).send(`Set Send Help to Inbox to \`` + userconf[button.clickedByID + "_dmhelp"] + `\` for <@${button.clickedByID}>`)
+        done();
+    }
+	fs.writeFile("./configs/userconf.json",JSON.stringify(userconf));
+	} catch(err) {
+		msg.reply(ErrorCmds.errorhandle(err.message, err.name, msg.content, msg.author.id));
 	}
 })
 
 
-bot.on("message", msg => {
+client.on("message", msg => {
+	try {
 	var cmd = msg.content.split(" "); // Splits message so we can have arguments AND check if message starts with "X".
-	if (cmd[0] === botPrefix + "rng") {
-        msg.send(Math.floor(Math.random() * Number(cmd[2])) + Number(cmd[1]))
+	/* Command Currently Broken
+	if (cmd[0] === clientPrefix + "rng") {
+		msg.send("TEMP: In Nums are: " + cmd[1] + cmd[2]);
+        msg.send(Math.floor(Math.random() * Number(parseFloat(cmd[2]))) + Number(parseFloat(cmd[1])))
+	} */
+	if (cmd[0] === clientPrefix + "sendargs1") {
+		msg.send(cmd[1]);
 	}
-	if (cmd[0] === botPrefix + "about") {
+	if (cmd[0] === clientPrefix + "about") {
         msg.send(InfoCmds.about())
     }
-	if (cmd[0] === botPrefix + "settings") {
+	if (cmd[0] === clientPrefix + "throwerr") {
+        throw "Test Error Message";
+    }
+	if (cmd[0] === clientPrefix + "settings") {
 		/* This command section is fairly large */
 		channelid = msg.channelID
 		msg.send("Please select a settings group.", {buttons: [{id: 'userconfig', name: 'User'},{id: 'serverconfig', name: 'Server'}]} );
     }
-	if (cmd[0] === botPrefix + "help") {
-		msg.send("Please check your inbox to see the help list. If your private messages are closed, then please type ``&settings``, select User/Messages/Send Help to Inbox and press False.");
-        msg.author.send(InfoCmds.help(cmd[1]))
+	if (cmd[0] === clientPrefix + "printid") {
+		msg.send(msg.id)
+	}
+	if (cmd[0] === clientPrefix + "help") {
+		if (typeof userconf[msg.author.id + "_dmhelp"] === "undefined") {
+		userconf[msg.author.id + "_dmhelp"] = "true";
+		};
+		if (userconf[msg.author.id + "_dmhelp"] === "true") {
+			msg.send("Please check your inbox to see the help list. If your private messages are closed, then please type ``&settings``, and press the User/Send Help to Inbox buttons.");
+			msg.author.send(InfoCmds.help(cmd[1]))
+		} else {
+			msg.reply(InfoCmds.help(cmd[1]))
+		};
+		
     }
-	if (cmd[0] === botPrefix + "8ball") {
+	if (cmd[0] === clientPrefix + "8ball") {
         msg.send(FunCmds.eightball())
     }
-	if (cmd[0] === botPrefix + "ping") {
+	if (cmd[0] === clientPrefix + "ping") {
 		var date = new Date();
         var timestampbef = date.getMilliseconds();
 		msg.send("Please Wait...");
@@ -89,16 +102,13 @@ bot.on("message", msg => {
 		var latency = timestampaft - timestampbef;
 		msg.send("Pong! The latency is " + latency.toFixed(0) + "ms");
     }
-	if (cmd[0] === botPrefix + "btntest") {
-        msg.send("I has button 0w0.",{buttons: [{id: 'test', name: '0w0'},{id: 'test2', name: '0w0 2'}]});
-    }
-	if (cmd[0] === botPrefix + "bal") {
+	if (cmd[0] === clientPrefix + "bal") {
 		if (typeof levels[msg.author.id] === "undefined") {
 		levels[msg.author.id] = 0;
 		}
         msg.send("Your Current Balance Is $" + levels[msg.author.id]);
     }
-	if (cmd[0] === botPrefix + "work") {
+	if (cmd[0] === clientPrefix + "work") {
 		var job = EcoCmds.getjob();
 		var pay = EcoCmds.getworkpay(job);
 		var jobname = EcoCmds.getworkplace(job);
@@ -112,7 +122,10 @@ bot.on("message", msg => {
 		levels[msg.author.id] = 0;
 	} else {
 	levels[msg.author.id] = levels[msg.author.id] + 1;}
-	fs.writeFile("./configs/levels.json",JSON.stringify(levels));
+	fs.writeFile("./configs/levels.json",JSON.stringify(levels)); }
+	catch(err) {
+		msg.reply(ErrorCmds.errorhandle(err.message, err.name, msg.content, msg.author.id));
+	}
 })
 
-bot.login(botToken); // Logs the bot in.
+client.login(clientToken); // Logs the client in.
