@@ -1,7 +1,8 @@
 /* FLAME NERTIVIA BOT
 Programmed by: Edgewurth
 Current Version: 2020-07-15 Patch 
-Current Version Number: 0.2.0 */
+Current Version Number: 0.2.0 
+API: NodeJS with Nertivia.JS */
 var vernum = "0.2.0"; // Update Every Build
 var vername = "2020-07-15 Patch"; // Update Every Build
 const NertiviaSys = require("nertivia.js");
