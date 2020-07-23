@@ -1,28 +1,6 @@
 // Sub for handling errors
-exports.errorhandle = function() {
-	var awns = [
-        'It is certain.',
-        'It is decidedly so.',
-        'Without a doubt.',
-        'Yes - definitely.',
-        'You may rely on it.',
-        'As I see it, yes.',
-        'Most likely.',
-        'Outlook good.',
-        'Yes.',
-        'Signs point to yes.',
-        'Reply Hazy, try again.',
-        'Ask again later.',
-        'Better not tell you now.',
-        'Cannot predict now.',
-        'Concentrate and ask again.',
-        'Don\'t count on it.',
-        'My reply is no.',
-        'My sources say no',
-        'Outlook not so good.',
-        'Very doubtful.',
-        'No.',
-        ];
-	
-	return awns[Math.floor(Math.random() * 21 + 1)];
+exports.errorhandle = function(errormsg, errorname, cmd, authorid) {
+	var date = new Date();
+	var datecurr = date.getUTCFullYear() + "-" + date.getUTCMonth() + "-" + date.getUTCDate() + " " + date.getUTCHours() + ":" + date.getUTCMinutes() + ":" + date.getUTCSeconds()
+	return "An Error Occurred, please visit https://bit.ly/2EcEqGr and create an new issue with the following as a log: ```\nDate (ISO 8601 UTC): " + datecurr + "\nFull Command Variable: " + cmd + "\nMessage Author ID: " + authorid + "\nError Name: " + errorname + "\nError Message: " + errormsg + "```";
 }
